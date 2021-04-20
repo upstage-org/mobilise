@@ -98,7 +98,11 @@ Scenes
 
 The Dashboard
 -------------------------------------------------------
-The dashboard represents the backstage of your productions, where you make important decisions and pull the strings from behind the scenes! Here you can view your own stages, as well as the stages of others. By default, you will only see your own stages listed. To view the stages of others, toggle the green switch at the top left. Each stage listed has its number, name, and owner displayed. To the right of that, you will find a “detail” button and an “edit” button. 
+The dashboard represents the backstage of your productions, where you make important decisions and pull the strings from behind the scenes! Here you can view your own stages, as well as the stages of others. By default, you will only see your own stages listed. To view the stages of others, toggle the green switch at the top left.
+
+To find a specific stage, search for the stage's title or creator in the left-hand searchbar.
+
+Each stage listed has its number, name, and owner displayed. To the right of that, you will find a “detail” button and an “edit” button. 
 
 
 .. image:: /dashboard.png
@@ -123,15 +127,10 @@ When you click the “edit” button, that action will redirect you to the stage
  
     
     
- Managing Your Stage
+ Manage Your Stage
  -------------------------------------------------------
+ From the stage managment page, you can alter and add to anything you were prompted to choose when you created the stage. 
 
-
-.. _find-stage:
-
-Finding a Stage
--------------------------------------------------------
-Mauris non faucibus ipsum. Donec in nisl et nisi egestas venenatis. Fusce egestas, quam non iaculis vulputate, erat lacus imperdiet risus, vitae cursus elit est vitae mi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi eu ultricies sem. Aliquam id quam ante. Sed sagittis mollis vehicula. Quisque non sodales ante, nec commodo eros. Mauris mattis purus vel erat consequat, congue vestibulum erat eleifend. Ut eget quam laoreet leo placerat imperdiet. Morbi molestie sodales libero, sit amet porttitor arcu mattis fringilla. Curabitur ultrices nec tellus vitae tempus.
 
 
 Media
@@ -157,7 +156,7 @@ You can change a media file's type by finding it under the "media" listing and c
 
 Deleting Media
 -------------------------------------------------------
-Actually, you can delete a media from a stage but not delete it from the server. It's a security because this media can be use by another artist in another stage.
+Actually, you can delete a media file from a stage but not delete it from the server. It's a security measure because this media can be used by another artist in another stage.
 To "delete" it from your stage, go to the Dashboard :
 1 - Go on Media
 2 - Found your media
