@@ -21,6 +21,28 @@ When you first navigate into the UpStage platform, you are presented with the :r
 - In the center :ref:`header <header>` section you will find links to various sections of the UpStage `website`_ that provide information such as our history and values as well as how to get involved in the project.
 - Finally, the rightmost section of the :ref:`header <header>` provides links to both the :ref:`login <login>` and :ref:`registration <registration>` screens.
 
+To create a performance, you must follow several steps:
+<ol>
+<li>
+Create a Stage
+</li>
+<li>
+Set The Stage
+</li>
+<li>
+Manage The Stage
+</li>
+<li>
+Reherse The Performance
+</li>
+<li>
+Advertise The Performance
+</li>
+<li>
+Begin The Live Performance
+</li>
+</ol>
+
 Users
 *******************************************************
 
@@ -77,7 +99,7 @@ Stages
 
 .. _create-stage:
 
-Creating a Stage
+Setting The Stage: Stage Manager
 -------------------------------------------------------
 
 Once you have logged in, navigate to the dashboard, located in the upper right, where you can create and manage stages.[screenshot]
