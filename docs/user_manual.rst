@@ -23,21 +23,21 @@ When you first navigate into the UpStage platform, you are presented with the :r
 
 To create a performance, you must follow several steps:
 <ol>
-<li>Create a Stage</li>
+<li>1. Create a Stage</li>
 <li>
-Set The Stage
+2. Set The Stage
 </li>
 <li>
-Manage The Stage
+3. Manage The Stage
 </li>
 <li>
-Reherse The Performance
+4. Reherse The Performance
 </li>
 <li>
-Advertise The Performance
+5. Advertise The Performance
 </li>
 <li>
-Begin The Live Performance
+6. Begin The Live Performance
 </li>
 </ol>
 
