@@ -24,21 +24,14 @@ When you first navigate into the UpStage platform, you are presented with the :r
 To create a performance, you must follow several steps:
 <ol>
 <li>1. Create a Stage</li>
-<li>
-2. Set The Stage
-</li>
-<li>
-3. Manage The Stage
-</li>
-<li>
-4. Reherse The Performance
-</li>
-<li>
-5. Advertise The Performance
-</li>
-<li>
-6. Begin The Live Performance
-</li>
+Every performance needs a stage, so you must first create one by navigating to "dashboard" and clicking "new" in the upper right this will take you to the stage manager page. Give your new stage a name and description.
+<li>2. Set The Stage</li>
+Once you have created your stage, it's time to set it! You can select a number of elements and settings. Don't worry about getting everything just right. If you would like to change anything, you can always return later via the dashboard.
+<li>3. Manage The Stage</li>
+If you would like to duplicate your stage or delete it, simply navigate to the dashboard and press the "detail button" to the left of it. If you need help finding a stage, you can use the searchbar on the left. By default, you only see you own stage. To turn this setting off and view all stages, toggle the green switch on the left. 
+<li>4. Reherse The Performance</li>
+<li>5. Advertise The Performance</li>
+<li>6. Begin The Live Performance</li>
 </ol>
 
 Users
