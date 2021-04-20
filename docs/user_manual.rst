@@ -23,9 +23,7 @@ When you first navigate into the UpStage platform, you are presented with the :r
 
 To create a performance, you must follow several steps:
 <ol>
-<li>
-Create a Stage
-</li>
+<li>Create a Stage</li>
 <li>
 Set The Stage
 </li>
