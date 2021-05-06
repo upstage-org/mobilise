@@ -152,6 +152,11 @@ const routes = [
             name: 'Scenes',
             path: 'scenes',
             component: () => import('../views/dashboard/StageManagement/Scenes.vue'),
+          },
+          {
+            name: 'Records',
+            path: 'records',
+            component: () => import('../views/dashboard/StageManagement/Records.vue'),
           }
         ]
       }
@@ -162,6 +167,11 @@ const routes = [
     path: '/live/:url?',
     name: 'Live',
     component: () => import('../views/live/Layout.vue'),
+  },
+  {
+    path: '/replay/:url/:id',
+    name: 'Replay Record',
+    component: () => import('../views/replay/Layout.vue'),
   },
 ]
 

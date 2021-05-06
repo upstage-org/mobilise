@@ -2,22 +2,24 @@
   <div @contextmenu.prevent="openMenu">
     <slot name="trigger" />
   </div>
-  <transition :css="false" @enter="contextAppear">
-    <div
-      class="card"
-      v-if="isActive"
-      v-click-outside="closeMenu"
-      :style="{
-        position: 'fixed',
-        top: position.y + 'px',
-        left: position.x + 'px',
-        'z-index': 10000,
-        overflow: 'visible',
-      }"
-    >
-      <slot name="context" :closeMenu="closeMenu" />
-    </div>
-  </transition>
+  <teleport to="body">
+    <transition :css="false" @enter="contextAppear">
+      <div
+        class="card"
+        v-if="isActive"
+        v-click-outside="closeMenu"
+        :style="{
+          position: 'fixed',
+          top: position.y + 'px',
+          left: position.x + 'px',
+          'z-index': 10000,
+          overflow: 'visible',
+        }"
+      >
+        <slot name="context" :closeMenu="closeMenu" />
+      </div>
+    </transition>
+  </teleport>
 </template>
 
 <script>

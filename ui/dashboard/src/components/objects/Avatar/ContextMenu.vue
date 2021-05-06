@@ -26,40 +26,18 @@
       </span>
       <span>Send to back</span>
     </a>
-    <a
-      v-if="holdable"
-      class="panel-block"
-      @click="changeNickname"
-    >
+    <a v-if="holdable" class="panel-block" @click="changeNickname">
       <span class="panel-icon">
         <Icon src="change-nickname.svg" />
       </span>
       <span>Change your nickname</span>
     </a>
-    <div class="field has-addons menu-group">
-      <p class="control menu-group-title">
-        <span class="panel-icon pt-1">
-          <Icon src="rotation-slider.svg" />
-        </span>
-        <span>Rotation</span>
-      </p>
-      <p class="control menu-group-item">
-        <button class="button is-light" @click="rotate(+45)">
-          <span class="panel-icon">
-            <Icon src="45degpositive.svg" />
-          </span>
-          <span>+ 45deg</span>
-        </button>
-      </p>
-      <p class="control menu-group-item">
-        <button class="button is-light" @click="rotate(-45)">
-          <span class="panel-icon">
-            <Icon src="45degnegative.svg" />
-          </span>
-          <span>- 45deg</span>
-        </button>
-      </p>
-    </div>
+    <a v-if="holdable" class="panel-block" @click="openVoiceSetting">
+      <span class="panel-icon">
+        <Icon src="change-nickname.svg" />
+      </span>
+      <span>Voice setting</span>
+    </a>
     <div class="field has-addons menu-group">
       <p class="control menu-group-title">
         <span class="panel-icon pt-1">
@@ -86,7 +64,7 @@
           }"
           @click="changeSliderMode('animation')"
         >
-          <span>Frame Animation</span>
+          <span>Animation</span>
         </button>
       </p>
       <p class="control menu-group-item">
@@ -97,7 +75,7 @@
           }"
           @click="changeSliderMode('speed')"
         >
-          <span>Move Speed</span>
+          <span>Movement</span>
         </button>
       </p>
     </div>
@@ -179,7 +157,7 @@ export default {
 
     const changeNickname = () =>
       store.dispatch("stage/openSettingPopup", {
-        type: "Chat",
+        type: "ChatParameters",
       });
 
     const bringToFront = () => {
@@ -196,18 +174,19 @@ export default {
       props.keepActive(true);
     };
 
-    const rotate = (deg) => {
-      store.dispatch("stage/shapeObject", {
-        ...props.object,
-        rotate: (props.object.rotate ?? 0) + deg,
-      });
-    };
-
     const holder = inject("holder") ?? ref();
     const holdable = inject("holdable") ?? ref();
     const isHolding = computed(
       () => holder.value && holder.value.id === store.state.stage.session
     );
+
+    const openVoiceSetting = () => {
+      store
+        .dispatch("stage/openSettingPopup", {
+          type: "VoiceParameters",
+        })
+        .then(props.closeMenu);
+    };
 
     return {
       switchFrame,
@@ -219,9 +198,9 @@ export default {
       sendToBack,
       toggleAutoplayFrames,
       changeSliderMode,
-      rotate,
+      openVoiceSetting,
       isHolding,
-      holdable
+      holdable,
     };
   },
 };

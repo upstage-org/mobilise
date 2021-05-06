@@ -9,13 +9,21 @@
         'is-warning': status === 'CONNECTING',
       }"
     >
-      <span class="icon" v-show="status !== 'OFFLINE'">
-        <i ref="dot" class="fas fa-circle"></i>
-      </span>
-      <span class="icon" v-show="status === 'OFFLINE'">
-        <i class="far fa-circle"></i>
-      </span>
-      <span class="status-text">{{ status }}</span>
+      <template v-if="replaying">
+        <span class="icon">
+          <i ref="dot" class="fas fa-circle"></i>
+        </span>
+        <span class="status-text">REPLAYING</span>
+      </template>
+      <template v-else>
+        <span class="icon" v-show="status !== 'OFFLINE'">
+          <i ref="dot" class="fas fa-circle"></i>
+        </span>
+        <span class="icon" v-show="status === 'OFFLINE'">
+          <i class="far fa-circle"></i>
+        </span>
+        <span class="status-text">{{ status }}</span>
+      </template>
     </span>
 
     <Popover>
@@ -44,7 +52,7 @@
 <script>
 import { useStore } from "vuex";
 import anime from "animejs";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, inject } from "vue";
 import Popover from "@/components/Popover";
 import Session from "./Session";
 import FirefoxWarning from "./FirefoxWarning";
@@ -61,6 +69,7 @@ export default {
     const audiences = computed(() =>
       store.state.stage.sessions.filter((s) => !s.isPlayer)
     );
+    const replaying = inject("replaying");
 
     onMounted(() => {
       anime({
@@ -76,6 +85,7 @@ export default {
       dot,
       players,
       audiences,
+      replaying,
     };
   },
 };

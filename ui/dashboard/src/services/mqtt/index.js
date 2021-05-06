@@ -37,13 +37,15 @@ const mqttService = {
       );
     })
   },
-  sendMessage(topic, payload) {
-    topic = namespaceTopic(topic);
-    console.log({ topic, payload })
+  sendMessage(topic, payload, namespaced) {
+    if (!namespaced) {
+      topic = namespaceTopic(topic);
+    }
     let message = payload;
     if (typeof payload === "object") {
       message = JSON.stringify(payload);
     }
+    console.log(topic, message)
     return new Promise((resolve, reject) => {
       this.client.publish(
         topic,

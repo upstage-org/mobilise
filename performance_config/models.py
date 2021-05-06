@@ -13,7 +13,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, DateTime, String, BigInteger, Integer, ForeignKey, Text
 from sqlalchemy.orm import relationship
 
-from config.project_globals import Base,metadata,DBSession
+from config.project_globals import Base,metadata,DBSession,db
 from user.models import User
 from asset.models import Asset,Stage
 
@@ -50,6 +50,16 @@ class ParentAsset(Base,db.Model):
     asset = relationship(Asset, foreign_keys=[asset_id])
     child_asset = relationship(Asset, foreign_keys=[child_asset_id])
 
+class Performance(Base,db.Model):
+    __tablename__ = "performance"
+    id = Column(BigInteger, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    stage_id = Column(Integer, ForeignKey(Stage.id), nullable=False, default=0)
+    stage = relationship(Stage, foreign_keys=[stage_id])
+    created_on = Column(DateTime, nullable=False, default=datetime.utcnow)
+    expires_on = Column(DateTime, nullable=False, default=None)
+
 class PerformanceConfig(Base,db.Model):
     __tablename__ = "performance_config"
     id = Column(BigInteger, primary_key=True)
@@ -78,7 +88,7 @@ class Scene(Base,db.Model):
     parent_stage_id = Column(Integer, ForeignKey(ParentStage.id), nullable=False, default=0)
     # A scene can only belong to one performance. They shouldn't be reused, although
     # maybe we should let them be copied?
-    performance_config_id = Column(Integer, ForeignKey(Performance_config.id), nullable=False, default=0)
+    performance_config_id = Column(Integer, ForeignKey(PerformanceConfig.id), nullable=False, default=0)
     owner = relationship(User, foreign_keys=[owner_id])
     parent_stage = relationship(ParentStage, foreign_keys=[parent_stage_id])
     performance_config = relationship(PerformanceConfig, foreign_keys=[performance_config_id])

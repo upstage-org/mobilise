@@ -1,4 +1,8 @@
+DROP TABLE IF EXISTS "scene";
 DROP TABLE IF EXISTS "parent_stage";
+DROP TABLE IF EXISTS "parent_asset";
+DROP TABLE IF EXISTS "live_performance_mqtt_config";
+DROP TABLE IF EXISTS "performance";
 CREATE TABLE "public"."parent_stage" (
     "id" BIGSERIAL NOT NULL,
     "stage_id" integer NOT NULL,
@@ -8,8 +12,7 @@ CREATE TABLE "public"."parent_stage" (
     PRIMARY KEY ("id")
 );
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-DROP TABLE IF EXISTS "parent_asset";
-CREATE TABLE "public"."parent_stage" (
+CREATE TABLE "public"."parent_asset" (
     "id" BIGSERIAL NOT NULL,
     "asset_id" integer NOT NULL,
     "child_asset_id" integer NOT NULL,
@@ -18,20 +21,17 @@ CREATE TABLE "public"."parent_stage" (
     PRIMARY KEY ("id")
 );
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-DROP TABLE IF EXISTS "performance";
 CREATE TABLE "public"."performance" (
     "id" BIGSERIAL NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "splash_screen_text" TEXT default null,
-    "splash_screen_animation_urls" TEXT default null,
-    "owner_id" integer NOT NULL,
+    "name" TEXT NULL,
+    "description" TEXT NULL,
+    "stage_id" integer NOT NULL,
     "created_on" timestamp DEFAULT (now() at time zone 'utc'),
     "expires_on" timestamp DEFAULT null,
+    FOREIGN KEY (stage_id) REFERENCES stage(id),
     PRIMARY KEY ("id")
 );
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-DROP TABLE IF EXISTS "scene";
 CREATE TABLE "public"."scene" (
     "id" BIGSERIAL NOT NULL,
     "name" TEXT not null,
@@ -44,12 +44,11 @@ CREATE TABLE "public"."scene" (
     "performance_id" integer NOT NULL,
     FOREIGN KEY (parent_stage_id) REFERENCES parent_stage(id),
     FOREIGN KEY (performance_id) REFERENCES performance(id),
-    FOREIGN KEY (owner_id) REFERENCES owner(id),
+    FOREIGN KEY (owner_id) REFERENCES upstage_user(id),
     PRIMARY KEY ("id")
 );
 CREATE INDEX "scene_scene_order_idx" ON "public"."scene" USING btree ("scene_order");
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-DROP TABLE IF EXISTS "live_performance_mqtt_config";
 CREATE TABLE "public"."live_performance_mqtt_config" (
     "id" BIGSERIAL NOT NULL,
     "name" TEXT not null,
@@ -64,6 +63,6 @@ CREATE TABLE "public"."live_performance_mqtt_config" (
     "expires_on" timestamp DEFAULT null,
     "performance_id" integer NOT NULL,
     FOREIGN KEY (performance_id) REFERENCES performance(id),
-    FOREIGN KEY (owner_id) REFERENCES owner(id),
+    FOREIGN KEY (owner_id) REFERENCES upstage_user(id),
     PRIMARY KEY ("id")
 );

@@ -1,82 +1,71 @@
 <template>
-  <div id="chatbox" class="card is-light" :class="{ collapsed }">
-    <div class="actions">
-      <Reaction v-if="collapsed" />
-      <button
-        class="chat-setting button is-rounded is-light"
-        @click="collapsed = !collapsed"
-      >
-        <span class="icon">
-          <Icon v-if="collapsed" src="maximize.svg" size="20" />
-          <Icon v-else src="minimize.svg" size="24" class="mt-4" />
-        </span>
-      </button>
-      <button
-        class="chat-setting button is-rounded is-light"
-        @click="openChatSetting"
-      >
-        <span class="icon">
-          <Icon src="setting.svg" size="32" />
-        </span>
-      </button>
+  <transition :css="false" @enter="enter" @leave="leave">
+    <div
+      id="chatbox"
+      v-show="chatVisibility"
+      class="card is-light"
+      :class="{ collapsed }"
+      :style="{ opacity }"
+    >
+      <div class="actions">
+        <Reaction v-if="collapsed" />
+        <button
+          class="chat-setting button is-rounded is-light"
+          @click="collapsed = !collapsed"
+        >
+          <span class="icon">
+            <Icon v-if="collapsed" src="maximize.svg" size="20" />
+            <Icon v-else src="minimize.svg" size="24" class="mt-4" />
+          </span>
+        </button>
+        <button
+          class="chat-setting button is-rounded is-light"
+          @click="openChatSetting"
+        >
+          <span class="icon">
+            <Icon src="setting.svg" size="32" />
+          </span>
+        </button>
+      </div>
+      <div class="card-content" ref="theContent">
+        <Messages :messages="messages" />
+      </div>
+      <footer class="card-footer">
+        <div class="card-footer-item">
+          <div v-if="!collapsed" class="is-fullwidth my-1" style="height: 30px">
+            <Reaction :custom-emoji="true" />
+          </div>
+          <div class="control has-icons-right is-fullwidth">
+            <emoji-input
+              v-model="message"
+              placeholder="Type message"
+              :loading="loadingUser"
+              @submit="sendChat"
+            />
+          </div>
+        </div>
+      </footer>
     </div>
-    <div class="card-content" ref="theContent">
-      <div v-if="!messages.length" class="columns is-vcentered is-fullheight">
-        <div class="column has-text-centered has-text-light">
-          <i class="fas fa-comments fa-4x"></i>
-          <p class="subtitle has-text-light">No messages yet!</p>
-        </div>
-      </div>
-      <div v-else>
-        <p v-for="item in messages" :key="item">
-          <small>
-            <time v-if="false">({{ item.at }}) </time>
-            <b>{{ item.user }}: </b>
-          </small>
-          <span
-            class="tag message"
-            :style="
-              'background-color: ' +
-              item.backgroundColor +
-              '; color: ' +
-              item.color
-            "
-            >{{ item.message }}</span
-          >
-        </p>
-      </div>
-    </div>
-    <footer class="card-footer">
-      <div class="card-footer-item">
-        <div v-if="!collapsed" class="is-fullwidth my-1" style="height: 30px">
-          <Reaction :custom-emoji="true" />
-        </div>
-        <div class="control has-icons-right is-fullwidth">
-          <emoji-input
-            v-model="message"
-            placeholder="Type message"
-            :loading="loadingUser"
-            @submit="sendChat"
-          />
-        </div>
-      </div>
-    </footer>
-  </div>
+  </transition>
 </template>
 
 <script>
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import anime from "animejs";
 import { useStore } from "vuex";
 import EmojiInput from "@/components/form/EmojiInput";
 import Icon from "@/components/Icon";
 import Reaction from "./Reaction";
+import Messages from "./Messages";
 
 export default {
-  components: { EmojiInput, Reaction, Icon },
+  components: { EmojiInput, Reaction, Icon, Messages },
   setup: () => {
     const theContent = ref();
     const store = useStore();
+    const chatVisibility = computed(
+      () => store.state.stage.settings.chatVisibility
+    );
 
     const messages = computed(() => store.state.stage.chat.messages);
     const loadingUser = computed(() => store.state.user.loadingUser);
@@ -97,11 +86,32 @@ export default {
       }
     };
     watch(messages.value, scrollToEnd);
+    onMounted(scrollToEnd);
 
     const openChatSetting = () =>
       store.dispatch("stage/openSettingPopup", {
-        type: "Chat",
+        type: "ChatParameters",
       });
+
+    const opacity = computed(() => store.state.stage.chat.opacity);
+
+    const enter = (el, complete) => {
+      anime({
+        targets: el,
+        scale: [0, 1],
+        translateY: [-200, 0],
+        complete,
+      });
+    };
+    const leave = (el, complete) => {
+      anime({
+        targets: el,
+        scale: 0,
+        translateY: -200,
+        easing: "easeInOutExpo",
+        complete,
+      });
+    };
 
     return {
       messages,
@@ -111,6 +121,10 @@ export default {
       loadingUser,
       openChatSetting,
       collapsed,
+      opacity,
+      chatVisibility,
+      enter,
+      leave,
     };
   },
 };
@@ -126,8 +140,8 @@ export default {
   height: calc(100% - 135px);
   bottom: 16px;
   right: 16px;
-  opacity: 0.9;
   overflow: visible;
+  z-index: 3;
 
   .card-content {
     flex-grow: 1;
@@ -153,11 +167,6 @@ export default {
     }
   }
 
-  .message {
-    white-space: break-spaces;
-    height: unset;
-    color: white;
-  }
   .actions {
     position: absolute;
     right: 24px;

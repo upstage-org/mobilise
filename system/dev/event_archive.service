@@ -1,0 +1,9 @@
+[Unit]
+Description=UpStage event archive service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/upstage/mobilise/run_event_archive.py
+
+[Install]
+WantedBy=multi-user.target

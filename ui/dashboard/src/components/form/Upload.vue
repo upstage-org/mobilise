@@ -73,10 +73,10 @@ export default {
     const accept = computed(() => {
       let extensions = [];
       if (props.acceptImage) {
-        extensions.push(".bmp,.svg,.jpg,.png,.gif");
+        extensions.push(".svg,.jpg,.png,.gif");
       }
       if (props.acceptAudio) {
-        extensions.push(".wav,.mpeg,.mp4,.aac,.aacp,.ogg,.webm,.flac");
+        extensions.push(".wav,.mpeg,.mp3,.aac,.aacp,.ogg,.webm,.flac,.m4a");
       }
       if (props.acceptVideo) {
         extensions.push(".mp4,.webm,.opgg,.3gp,.flv");

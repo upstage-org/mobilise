@@ -1,11 +1,12 @@
-const { VUE_APP_CONFIG } = process.env;
+const { VUE_APP_API_ENDPOINT, VUE_APP_GRAPHQL_ENDPOINT, VUE_APP_STATIC_ASSETS_ENDPOINT, VUE_APP_MQTT_NAMESPACE } = process.env;
 
 let configs = {
-    API_ENDPOINT: 'https://app1.upstage.org.nz/V4.0/',
-    GRAPHQL_ENDPOINT: 'https://app1.upstage.org.nz/V4.0/',
-    STATIC_ASSETS_ENDPOINT: 'https://app1.upstage.org.nz/V4.0/static/assets/',
+    API_ENDPOINT: VUE_APP_API_ENDPOINT,
+    GRAPHQL_ENDPOINT: VUE_APP_GRAPHQL_ENDPOINT,
+    STATIC_ASSETS_ENDPOINT: VUE_APP_STATIC_ASSETS_ENDPOINT,
     AXIOS_TIMEOUT: 10000,
     ACCESS_TOKEN_KEY: 'access_token',
+    MQTT_NAMESPACE: VUE_APP_MQTT_NAMESPACE,
     MQTT_CONNECTION: {
         url: 'wss://svc.upstage.org.nz:9001/mqtt',
         username: 'performance',
@@ -15,14 +16,6 @@ let configs = {
         reconnectPeriod: 4000, // Reconnection interval
         retain: true,
     },
-}
-
-if (VUE_APP_CONFIG) {
-    const envConfig = JSON.parse(VUE_APP_CONFIG);
-    configs = {
-        ...configs,
-        ...envConfig
-    }
 }
 
 export default configs;

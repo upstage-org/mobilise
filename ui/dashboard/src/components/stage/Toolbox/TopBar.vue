@@ -20,10 +20,11 @@ import Audio from "./tools/Audio";
 import Draw from "./tools/Draw/index";
 import Stream from "./tools/Stream";
 import Text from "./tools/Text";
+import Setting from "./tools/Setting";
 
 export default {
   props: ["tool"],
-  components: { Avatars, Backdrop, Props, Audio, Draw, Stream, Text },
+  components: { Avatars, Backdrop, Props, Audio, Draw, Stream, Text, Setting },
   setup: () => {
     const bar = ref();
     const horizontalScroll = (e) => {

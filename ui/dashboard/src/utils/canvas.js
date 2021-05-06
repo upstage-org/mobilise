@@ -1,4 +1,4 @@
-export const cropImageFromCanvas = (canvas) => {
+export const clipDrawedArea = canvas => {
     var ctx = canvas.getContext("2d");
     var w = canvas.width,
         h = canvas.height,
@@ -25,12 +25,32 @@ export const cropImageFromCanvas = (canvas) => {
     });
     var n = pix.x.length - 1;
 
-    w = 1 + pix.x[n] - pix.x[0];
-    h = 1 + pix.y[n] - pix.y[0];
+    x = pix.x[0]
+    y = pix.y[0]
+    w = 1 + pix.x[n] - x;
+    h = 1 + pix.y[n] - y;
     if (isNaN(w) && isNaN(h)) {
         return;
+    } else {
+        return {
+            x, y, w, h,
+            original: {
+                canvasWidth: canvas.width,
+                canvasHeight: canvas.height,
+                x, y, w, h
+            }
+        }
     }
-    var cut = ctx.getImageData(pix.x[0], pix.y[0], w, h);
+}
+
+export const cropImageFromCanvas = (canvas) => {
+    const position = clipDrawedArea(canvas)
+    if (!position) {
+        return;
+    }
+    const { x, y, w, h } = position;
+    var ctx = canvas.getContext("2d");
+    var cut = ctx.getImageData(x, y, w, h);
 
     const tmpCanvas = document.createElement('canvas');
     tmpCanvas.width = w;
@@ -40,9 +60,6 @@ export const cropImageFromCanvas = (canvas) => {
     const image = tmpCanvas.toDataURL();
     return {
         src: image,
-        x: pix.x[0],
-        y: pix.y[0],
-        w,
-        h,
+        ...position
     };
 };

@@ -1,9 +1,13 @@
 <template>
   <Logo id="live-logo" />
   <div id="main-content">
-    <PageLoader />
+    <Preloader />
     <template v-if="ready">
-      <Live />
+      <Board />
+      <ConnectionStatus />
+      <Toolbox v-if="loggedIn" />
+      <Chat />
+      <AudioPlayer />
       <LoginPrompt />
       <SettingPopup />
     </template>
@@ -13,14 +17,28 @@
 <script>
 import Logo from "@/components/Logo";
 import SettingPopup from "@/components/stage/SettingPopup";
-import PageLoader from "./PageLoader";
+import Chat from "@/components/stage/Chat/index";
+import Toolbox from "@/components/stage/Toolbox";
+import Board from "@/components/stage/Board";
+import AudioPlayer from "@/components/stage/AudioPlayer";
+import Preloader from "./Preloader";
 import LoginPrompt from "./LoginPrompt";
-import Live from "./Live";
+import ConnectionStatus from "./ConnectionStatus";
 import { useStore } from "vuex";
-import { computed } from "vue";
+import { computed, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 export default {
-  components: { Logo, PageLoader, LoginPrompt, SettingPopup, Live },
+  components: {
+    Logo,
+    Preloader,
+    LoginPrompt,
+    SettingPopup,
+    Chat,
+    Toolbox,
+    Board,
+    AudioPlayer,
+    ConnectionStatus,
+  },
   setup: () => {
     const store = useStore();
     const ready = computed(
@@ -28,9 +46,23 @@ export default {
     );
 
     const route = useRoute();
-    store.dispatch("stage/loadStage", route.params.url);
+    store.dispatch("stage/loadStage", { url: route.params.url }).then(() => {
+      store.dispatch("stage/connect");
+    });
+
+    onUnmounted(() => {
+      store.dispatch("stage/disconnect");
+    });
+
+    window.addEventListener("beforeunload", () => {
+      store.dispatch("stage/disconnect");
+    });
+
+    const loggedIn = computed(() => store.getters["auth/loggedIn"]);
+
     return {
       ready,
+      loggedIn,
     };
   },
 };
@@ -39,6 +71,12 @@ export default {
 <style lang="scss">
 #main-content {
   min-height: calc(100vh - 120px);
+}
+#live-stage {
+  *:not(input, textarea) {
+    -webkit-user-select: none; /* Safari */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+  }
 }
 #live-logo {
   position: fixed;

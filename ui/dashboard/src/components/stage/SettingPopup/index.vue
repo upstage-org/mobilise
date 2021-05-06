@@ -2,7 +2,8 @@
   <transition name="fade">
     <div v-if="type" class="modal" :class="{ 'is-active': isActive }">
       <div class="modal-background" @click="close"></div>
-      <div ref="modal" class="modal-content">
+      <component v-if="simple" :is="type" @close="close" />
+      <div v-else ref="modal" class="modal-content">
         <div class="card">
           <a href="#" class="card-header-icon" @click="close">
             <span class="icon">
@@ -19,23 +20,26 @@
 <script>
 import { computed, ref } from "vue";
 import { useStore } from "vuex";
-import Chat from "./settings/Chat";
+import ChatBox from "./settings/ChatBox";
+import ChatParameters from "./settings/ChatParameters";
+import VoiceParameters from "./settings/VoiceParameters";
 import CreateStream from "./settings/CreateStream";
 import Icon from "@/components/Icon";
 
 export default {
-  components: { Chat, CreateStream, Icon },
+  components: { ChatParameters, VoiceParameters, CreateStream, Icon, ChatBox },
   setup: () => {
     const store = useStore();
     const isActive = computed(() => store.state.stage.settingPopup.isActive);
     const type = computed(() => store.state.stage.settingPopup.type);
     const title = computed(() => store.state.stage.settingPopup.title);
+    const simple = computed(() => store.state.stage.settingPopup.simple);
     const modal = ref();
 
     const close = () => {
       store.dispatch("stage/closeSettingPopup");
     };
-    return { isActive, close, modal, type, title };
+    return { isActive, close, modal, type, title, simple };
   },
 };
 </script>

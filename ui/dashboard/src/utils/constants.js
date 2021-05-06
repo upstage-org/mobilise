@@ -1,10 +1,10 @@
 export const TOPICS = {
-  CHAT: "topic/chat",
-  BOARD: "topic/board",
-  BACKGROUND: "topic/background",
-  AUDIO: "topic/audio",
-  REACTION: "topic/reaction",
-  COUNTER: "topic/counter",
+  CHAT: "chat",
+  BOARD: "board",
+  BACKGROUND: "background",
+  AUDIO: "audio",
+  REACTION: "reaction",
+  COUNTER: "counter",
 }
 
 export const BOARD_ACTIONS = {
@@ -16,6 +16,12 @@ export const BOARD_ACTIONS = {
   BRING_TO_FRONT: 'bringToFront',
   SEND_TO_BACK: 'sendToBack',
   TOGGLE_AUTOPLAY_FRAMES: 'toggleAutoplayFrames',
+}
+
+export const BACKGROUND_ACTIONS = {
+  CHANGE_BACKGROUND: 'changeBackground',
+  SET_CHAT_VISIBILITY: 'setChatVisibility',
+  SET_BACKDROP_COLOR: 'setBackdropColor'
 }
 
 export const ROLES = {

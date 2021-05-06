@@ -56,7 +56,7 @@
           Develop
         </a>
         <div class="vertical-divider" />
-        <router-link class="navbar-item" to="/donate">Donate</router-link>
+        <a class="navbar-item" to="/#">Donate</a>
         <div class="vertical-divider" />
         <router-link class="navbar-item" to="/live/demo">Stage</router-link>
       </div>
