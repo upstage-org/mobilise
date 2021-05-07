@@ -177,7 +177,34 @@ Performing (as an artist player)
 *******************************************************
 A performance involves several types of media uploads: avatars, props, and backgrounds. You chose these when you set the stage, and during a live performance they interact with each other in view of the audience. The players each control an avatar that may interact with other avatars, props, and the audience in front of a background. If the stage's creator chose music or sound effects, those media files will play.
 
+Settings of the Stage
+------------------------
+introduction bla bla bla
+
+Change color
+============
+Click on setting icons. There is an option on the top overlay wich is allow you to choose the color of the page background.
+
+Change proportion
+=================
+With and height of the stage are by default with 16/9 ratio. It could be change on the Backstage and in the layout section. Other option are 4/3 or enter your custom ratio yourself.
+
+.. _backdrops:
+
+Backdrops
+-------------------------------------------------------
+introduction : context use for a player, consequence for audience
+
+Place a backdrop
+================
+Click on the backdrop tool, an overlay appear on the top of the Stage. Select the one you want and it appear on Stage.
+
+Remove a backdrop
+=================
+Click on the backdrop tool, an overlay appear on the top of the Stage. Click on Clear button. No more backdrop appear on Stage.
+
 .. _avatars:
+
 
 Avatars
 -------------------------------------------------------
@@ -244,19 +271,6 @@ Delete
 =======================================================
 You can temove the avatar from your stage by right click to display the context menu and click on delete button. Alternatively, select and hot backspace.
 
-.. _audio:
-
-Audio
--------------------------------------------------------
-introduce : context use for a player an audio... what consequence for audience
-
-Run an audio
-=============
-Click on the audio tool. The differents audio appear on an overlay. Click on the one you want to run the sound, it's a play button.
-
-Pause an audio
-==============
-Re-clicking on the play button of the sound you make it pause. 
 
 .. _props:
 
@@ -296,20 +310,23 @@ Delete prop for the Stage
 =========================
 To take of the prop of your page, right click on it and hit the delete button visible on the context menu. The prop now is waiting on the overlay.
 
-.. _backdrops:
 
-Backdrops
+
+.. _audio:
+
+Audio
 -------------------------------------------------------
-introduction : context use for a player, consequence for audience
+introduce : context use for a player an audio... what consequence for audience
+
+Run an audio
+=============
+Click on the audio tool. The differents audio appear on an overlay. Click on the one you want to run the sound, it's a play button.
+
+Pause an audio
+==============
+Re-clicking on the play button of the sound you make it pause. 
 
 
-Place a backdrop
-================
-Click on the backdrop tool, an overlay appear on the top of the Stage. Select the one you want and it appear on Stage.
-
-Remove a backdrop
-=================
-Click on the backdrop tool, an overlay appear on the top of the Stage. Click on Clear button. No more backdrop appear on Stage.
 
 .._stream:
 
