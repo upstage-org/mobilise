@@ -30,7 +30,6 @@ export default {
     const isHolding = computed(
       () => props.object.id === store.state.user.avatarId
     );
-    const isPlayer = computed(() => store.getters["auth/loggedIn"]);
 
     const keepActive = () => {
       emit("update:active", true);
@@ -53,7 +52,6 @@ export default {
       toggleLiveAction,
       holder,
       isHolding,
-      isPlayer,
     };
   },
 };

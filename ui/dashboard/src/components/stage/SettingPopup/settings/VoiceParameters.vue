@@ -2,7 +2,7 @@
   <div class="card-header">
     <span class="card-header-title">Voice Setting</span>
   </div>
-  <div class="card-content">
+  <div class="card-content voice-parameters">
     <HorizontalField title="Voice">
       <Dropdown
         v-model="parameters.voice"
@@ -99,14 +99,16 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .card-footer-item {
   cursor: pointer;
 }
-.dropdown,
-.dropdown-trigger,
-.dropdown-trigger > button,
-.dropdown-menu {
-  width: 100%;
+.voice-parameters {
+  .dropdown,
+  .dropdown-trigger,
+  .dropdown-trigger > button,
+  .dropdown-menu {
+    width: 100%;
+  }
 }
 </style>

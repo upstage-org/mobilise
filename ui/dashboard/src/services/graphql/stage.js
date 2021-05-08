@@ -1,4 +1,5 @@
 import { gql } from "graphql-request";
+import { stageGraph } from ".";
 import { createClient } from "./graphql";
 
 const client = createClient('stage_graphql')
@@ -9,6 +10,7 @@ export const stageFragment = gql`
     name
     fileLocation
     description
+    permission
     owner {
       id
       username
@@ -43,19 +45,25 @@ export const assetFragment = gql`
 `
 
 export default {
-  createStage: (variables) => client.request(gql`
-    mutation CreateStage($name: String, $description: String, $ownerId: String, $fileLocation: String) {
-      createStage(input: {name: $name, description: $description, ownerId: $ownerId, fileLocation: $fileLocation}) {
-        stage {
-          id
-          name
+  createStage: async (variables) => {
+    let result = await client.request(gql`
+      mutation CreateStage($name: String, $fileLocation: String) {
+        createStage(input: {name: $name, fileLocation: $fileLocation}) {
+          stage {
+            id
+          }
         }
       }
+    `, variables);
+    if (result) {
+      variables.id = result.createStage.stage.id
+      result = await stageGraph.updateStage(variables)
+      return result.updateStage.stage
     }
-  `, variables),
+  },
   updateStage: (variables) => client.request(gql`
-    mutation UpdateStage($id: ID!, $name: String, $description: String, $ownerId: String, $fileLocation: String, $status: String) {
-      updateStage(input: {id: $id, name: $name, description: $description, ownerId: $ownerId, fileLocation: $fileLocation, status: $status}) {
+    mutation UpdateStage($id: ID!, $name: String, $description: String, $fileLocation: String, $status: String, $playerAccess: String) {
+      updateStage(input: {id: $id, name: $name, description: $description, fileLocation: $fileLocation, status: $status, playerAccess: $playerAccess}) {
         stage {
           ...stageFragment
         }

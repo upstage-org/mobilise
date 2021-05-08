@@ -1,26 +1,60 @@
 <template>
   <DataTable :data="data" :headers="headers">
     <template #name="{ item }">
-      <router-link
-        :to="`/live/${item.fileLocation}`"
-        class="has-text-primary has-text-weight-bold"
-      >
-        {{ item.name }}
-      </router-link>
+      <span class="has-text-weight-bold">{{ item.name }}</span>
     </template>
     <template #detail="{ item }">
       <Modal>
         <template #trigger>
-          <i class="fas fa-lg fa-eye" />
+          <button class="button is-light is-small">
+            <i class="fas fa-lg fa-eye has-text-primary" />
+          </button>
         </template>
         <template #header>Stage Detail</template>
         <template #content><Detail :stage="item" /></template>
         <template #footer><ActionButtons :stage="item" /></template>
       </Modal>
     </template>
-    <template #edit="{ item }">
-      <router-link :to="`/dashboard/stage-management/${item.id}/`">
-        <i class="fa fa-lg fa-pen has-text-black"></i>
+    <template #manage="{ item }">
+      <template
+        v-if="item.permission === 'editor' || item.permission === 'owner'"
+      >
+        <router-link
+          :to="`/dashboard/stage-management/${item.id}/`"
+          class="button is-light is-small"
+          data-tooltip="Go to stage management"
+        >
+          <i class="fa fa-lg fa-cog has-text-primary"></i>
+        </router-link>
+        <router-link
+          :to="`/dashboard/stage-management/${item.id}/`"
+          class="button is-light is-small"
+          data-tooltip="Duplicate stage"
+        >
+          <i class="fa fa-lg fa-clone has-text-warning"></i>
+        </router-link>
+        <router-link
+          :to="`/dashboard/stage-management/${item.id}/`"
+          class="button is-light is-small"
+          data-tooltip="Delete stage"
+          v-if="item.permission === 'owner'"
+        >
+          <i class="fa fa-lg fa-trash has-text-danger"></i>
+        </router-link>
+      </template>
+      <span v-else data-tooltip="You don't have edit permission on this stage">
+        🙅‍♀️🙅‍♂️
+      </span>
+    </template>
+    <template #enter="{ item }">
+      <router-link
+        :to="`/live/${item.fileLocation}`"
+        class="button is-small is-primary"
+      >
+        <span>ENTER</span>
+        <span class="icon">
+          <i class="fas fa-chevron-right"></i>
+        </span>
       </router-link>
     </template>
   </DataTable>
@@ -49,14 +83,25 @@ export default {
         render: (item) => displayName(item.owner),
       },
       {
+        title: "Access",
+        description: "Your permited access to this stage",
+        render: (item) =>
+          item.permission[0].toUpperCase() + item.permission.substr(1),
+      },
+      {
         title: "Detail",
         description: "Duplicate/Manage stage",
         slot: "detail",
         align: "center",
       },
       {
-        title: "Edit Stage",
-        slot: "edit",
+        title: "Manage Stage",
+        slot: "manage",
+        align: "center",
+      },
+      {
+        title: "",
+        slot: "enter",
         align: "center",
       },
     ];

@@ -6,6 +6,7 @@ const client = createClient('user_graphql')
 export const userFragment = gql`
   fragment userFragment on User {
     id
+    dbId
     username
     firstName
     lastName

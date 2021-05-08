@@ -82,7 +82,7 @@ export default {
   props: ["id"],
   components: { Skeleton },
   setup: (props) => {
-    const { nodes, loading, fetch } = useRequest(stageGraph.getStage);
+    const { nodes, loading, fetch, data } = useRequest(stageGraph.getStage);
     const stage = useFirst(nodes);
     provide("stage", stage);
     watch(
@@ -90,6 +90,8 @@ export default {
       () => {
         if (props.id) {
           fetch(props.id);
+        } else {
+          data.value = null;
         }
       },
       { immediate: true }

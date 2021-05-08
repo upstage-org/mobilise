@@ -1,7 +1,7 @@
 <template>
   <div class="avatar-topping">
     <span
-      v-if="holder && isPlayer"
+      v-if="holder && canPlay"
       class="icon marker"
       :class="{ inactive: !isHolding }"
       :data-tooltip="`${object.name ? object.name + ' held by' : 'Held by'} ${
@@ -46,7 +46,7 @@ export default {
     const isHolding = computed(
       () => props.object.id === store.state.user.avatarId
     );
-    const isPlayer = computed(() => store.getters["auth/loggedIn"]);
+    const canPlay = computed(() => store.getters["stage/canPlay"]);
 
     const enter = (el, complete) => {
       anime({
@@ -80,7 +80,7 @@ export default {
       leave,
       holder,
       isHolding,
-      isPlayer,
+      canPlay,
       openChatBox,
     };
   },

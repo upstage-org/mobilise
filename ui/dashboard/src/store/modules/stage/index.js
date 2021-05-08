@@ -109,6 +109,9 @@ export default {
                 top = (window.innerHeight - height) / 2;
             }
             return { width, height, left, top };
+        },
+        canPlay(state) {
+            return state.model.permission && state.model.permission !== 'audience'
         }
     },
     mutations: {

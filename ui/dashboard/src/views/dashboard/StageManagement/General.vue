@@ -30,7 +30,9 @@
               : 'fas'
           "
           :help="!form.fileLocation && `From which the stage URL is created`"
-          :error="!shortNameValid && 'This short name already existed!'"
+          :error="
+            shortNameValid === false && 'This short name already existed!'
+          "
         />
       </div>
     </div>
@@ -54,20 +56,20 @@
 
     <div class="field is-horizontal">
       <div class="field-label is-normal">
-        <label class="label">Users</label>
+        <label class="label">Player access</label>
       </div>
-      <div class="field-body">
-        <div class="field is-narrow">
-          <div class="control">
-            <div class="select is-fullwidth">
-              <select v-model="form.ownerId">
-                <option v-for="user in users" :key="user" :value="user.id">
-                  {{ displayName(user) }}
-                </option>
-              </select>
-            </div>
-          </div>
-        </div>
+      <div class="field-body" style="flex-wrap: wrap">
+        <MultiTransferColumn
+          :columns="[
+            'Audience access only',
+            'Player access',
+            'Player and edit access',
+          ]"
+          :data="users"
+          :renderLabel="displayName"
+          :renderValue="(item) => item.dbId"
+          v-model="playerAccess"
+        />
       </div>
     </div>
 
@@ -101,7 +103,7 @@
       <div class="field-body">
         <div class="field">
           <div class="control">
-            <template v-if="stage">
+            <template v-if="stage.id">
               <button
                 class="button mr-2 mt-2 is-primary"
                 :class="{ 'is-loading': loading }"
@@ -135,13 +137,15 @@
 
 <script>
 import {
+  useAttribute,
   useMutation,
   useQuery,
   useRequest,
 } from "@/services/graphql/composable";
 import { stageGraph, userGraph } from "@/services/graphql";
-import { inject, reactive, ref } from "vue";
+import { inject, reactive, ref, watch } from "vue";
 import Field from "@/components/form/Field";
+import MultiTransferColumn from "@/components/MultiTransferColumn";
 import { notification } from "@/utils/notification";
 import { useRouter } from "vue-router";
 import { displayName } from "@/utils/auth";
@@ -149,7 +153,7 @@ import { debounce } from "@/utils/common";
 import SweepStage from "./SweepStage";
 
 export default {
-  components: { Field, SweepStage },
+  components: { Field, SweepStage, MultiTransferColumn },
   setup: () => {
     const router = useRouter();
     const stage = inject("stage");
@@ -157,24 +161,29 @@ export default {
     const form = reactive({
       ...stage.value,
       ownerId: stage.value.owner?.id,
-      status: stage.value.attributes?.find((a) => a.name === "status")
-        ?.description,
+      status: useAttribute(stage, "status").value,
+    });
+
+    const playerAccess = ref(
+      useAttribute(stage, "playerAccess", true).value ?? []
+    );
+
+    watch(playerAccess, (val) => {
+      form.playerAccess = JSON.stringify(val);
     });
 
     const { nodes: users } = useQuery(userGraph.userList);
-    const { loading, mutation, data } = useMutation(
+    const { loading, mutation } = useMutation(
       stage.value.id ? stageGraph.updateStage : stageGraph.createStage,
       form
     );
     const createStage = async () => {
       try {
-        await mutation();
-        notification.success(
-          "Stage created successfully! ID: " + data.value.createStage.stage.id
-        );
-        router.push(
-          `/dashboard/stage-management/${data.value.createStage.stage.id}/`
-        );
+        console.log("<<<====");
+        const stage = await mutation();
+        console.log("<<<====");
+        notification.success("Stage created successfully! ID: " + stage.id);
+        router.push(`/dashboard/stage-management/${stage.id}/`);
       } catch (error) {
         notification.error(error);
       }
@@ -216,6 +225,7 @@ export default {
       checkShortName,
       validatingShortName,
       shortNameValid,
+      playerAccess,
     };
   },
 };

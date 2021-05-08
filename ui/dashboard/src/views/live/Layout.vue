@@ -5,7 +5,7 @@
     <template v-if="ready">
       <Board />
       <ConnectionStatus />
-      <Toolbox v-if="loggedIn" />
+      <Toolbox v-if="canPlay" />
       <Chat />
       <AudioPlayer />
       <LoginPrompt />
@@ -58,11 +58,11 @@ export default {
       store.dispatch("stage/disconnect");
     });
 
-    const loggedIn = computed(() => store.getters["auth/loggedIn"]);
+    const canPlay = computed(() => store.getters["stage/canPlay"]);
 
     return {
       ready,
-      loggedIn,
+      canPlay,
     };
   },
 };

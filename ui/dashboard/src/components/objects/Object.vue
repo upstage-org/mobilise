@@ -94,8 +94,9 @@ export default {
     const holdable = computed(() =>
       ["avatar", "drawing"].includes(props.object.type)
     );
+    const canPlay = computed(() => store.getters["stage/canPlay"]);
     const controlable = computed(() => {
-      return holdable.value ? isHolding.value : store.getters["auth/loggedIn"];
+      return holdable.value ? isHolding.value : canPlay.value;
     });
     provide("holdable", holdable);
 
