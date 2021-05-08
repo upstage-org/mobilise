@@ -9,6 +9,7 @@
       <PanelItem name="Stream" icon="stream.svg" />
       <PanelItem name="Draw" icon="draw.svg" />
       <PanelItem name="Text" icon="text.svg" />
+      <PanelItem name="Setting" icon="rotation-slider.svg" />
       <a class="panel-block stage-scene-toggle">
         <span>
           <Icon
@@ -80,6 +81,7 @@ export default {
   opacity: 0.9;
   transition: transform 0.5s;
   top: 120px;
+  z-index: 2;
 
   .panel-icon {
     width: 1.5em;

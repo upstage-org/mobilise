@@ -2,7 +2,7 @@ export default {
     beforeMount: (el, binding) => {
         el.clickOutsideEvent = event => {
             if (!(el == event.target || el.contains(event.target))) {
-                binding.value();
+                binding.value(event);
             }
         };
         document.addEventListener("click", el.clickOutsideEvent);

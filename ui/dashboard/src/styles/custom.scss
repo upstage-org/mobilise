@@ -68,6 +68,9 @@ nav {
 .modal-card-foot {
     padding: 10px;
 }
+div.moveable-control-box {
+    --moveable-color: #{$primary};
+}
 // Desktop only css
 @media screen and (min-width: 1024px) {
     .navbar-start {

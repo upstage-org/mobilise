@@ -1,39 +1,44 @@
 <template>
-  <ElasticInput
-    v-if="!pickerOnly"
-    v-bind="$attrs"
-    :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-    @ref="(el) => (input = el)"
-    @submit="$emit('submit')"
-    :style="{
-      'border-top-right-radius': '20px',
-      'border-bottom-right-radius': '20px',
-      'padding-right': '40px',
-    }"
-  />
-  <div v-click-outside="() => (isPicking = false)" style="display: inline">
-    <button
-      type="button"
-      class="icon is-right clickable button is-rounded"
-      :class="{
-        'is-loading': loading,
-        'is-primary': !className,
-        [className]: true,
+  <div style="position: relative">
+    <ElasticInput
+      v-if="!pickerOnly"
+      v-bind="$attrs"
+      :model-value="modelValue"
+      @update:model-value="$emit('update:modelValue', $event)"
+      @ref="(el) => (input = el)"
+      @submit="$emit('submit')"
+      :style="{
+        'border-top-right-radius': '20px',
+        'border-bottom-right-radius': '20px',
+        'padding-right': '40px',
       }"
-      :disabled="loading"
-      :style="style"
-      @click="isPicking = !isPicking"
+    />
+    <div
+      v-click-outside="() => (isPicking = false)"
+      class="emoji-picker-wrapper"
     >
-      <slot name="icon">
-        <span class="icon" v-if="!loading">
-          <Icon size="48" src="emoji.svg" />
-        </span>
-      </slot>
-    </button>
-    <transition :css="false" @enter="pickerEnter">
-      <emoji-picker v-show="isPicking" class="light" />
-    </transition>
+      <button
+        type="button"
+        class="icon is-right clickable button is-rounded"
+        :class="{
+          'is-loading': loading,
+          'is-primary': !className,
+          [className]: true,
+        }"
+        :disabled="loading"
+        :style="style"
+        @click="isPicking = !isPicking"
+      >
+        <slot name="icon">
+          <span class="icon" v-if="!loading">
+            <Icon size="48" src="emoji.svg" />
+          </span>
+        </slot>
+      </button>
+      <transition :css="false" @enter="pickerEnter">
+        <emoji-picker v-show="isPicking" class="light" />
+      </transition>
+    </div>
   </div>
 </template>
 
@@ -92,7 +97,7 @@ emoji-picker {
   --input-border-color: #b5b5b5;
 
   position: absolute;
-  bottom: 40px;
+  bottom: 0;
   right: 0;
   z-index: 1000;
   overflow: hidden;
@@ -100,5 +105,14 @@ emoji-picker {
   box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
     0 0px 0 1px rgba(10, 10, 10, 0.02);
   transform-origin: bottom right;
+}
+.emoji-picker-wrapper {
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  > button {
+    height: unset;
+  }
 }
 </style>

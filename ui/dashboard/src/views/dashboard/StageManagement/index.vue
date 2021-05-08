@@ -1,16 +1,27 @@
 <template>
   <section class="hero is-small is-primary is-bold">
     <div class="hero-body">
-      <h1 class="title">Stage Management</h1>
+      <template v-if="id">
+        <h1 class="title" v-if="stage.name">
+          {{ stage.name }}
+          <router-link
+            :to="`/live/${stage.fileLocation}`"
+            class="button is-light"
+          >
+            <span>ENTER</span>
+            <span class="icon">
+              <i class="fas fa-chevron-right"></i>
+            </span>
+          </router-link>
+        </h1>
+        <p class="subtitle">Stage Management</p>
+      </template>
+      <h1 v-else class="title">Create new stage</h1>
     </div>
   </section>
   <div class="columns">
     <div class="column is-narrow">
       <aside class="menu box has-background-light mx-4">
-        <p class="menu-label">
-          <span v-if="id">{{ stage.name }}</span>
-          <span v-else>Create new stage</span>
-        </p>
         <ul class="menu-list">
           <li>
             <router-link
@@ -29,7 +40,7 @@
                 >Layout</router-link
               >
             </li>
-            <li>
+            <li id="media-menu">
               <router-link to="media" exact-active-class="is-active">
                 Media
               </router-link>
@@ -40,29 +51,17 @@
               </router-link>
             </li>
             <li>
+              <router-link to="records" exact-active-class="is-active">
+                Records
+              </router-link>
+            </li>
+            <li>
               <router-link to="scenes" exact-active-class="is-active">
                 Scenes
               </router-link>
-              <ul>
-                <li><a>Avatar</a></li>
-                <li><a>Props</a></li>
-                <li><a>Backdrop</a></li>
-                <li><a>Sound</a></li>
-                <li><a>Videos</a></li>
-                <li><a>Loading</a></li>
-              </ul>
             </li>
           </template>
         </ul>
-
-        <p v-if="id" class="menu-label">
-          <router-link
-            :to="`/live/${stage.fileLocation}`"
-            class="button is-block is-primary"
-          >
-            Enter!
-          </router-link>
-        </p>
       </aside>
     </div>
     <div class="column">
@@ -83,16 +82,14 @@ export default {
   props: ["id"],
   components: { Skeleton },
   setup: (props) => {
-    const { nodes, loading, fetch } = useRequest(stageGraph.stageList);
+    const { nodes, loading, fetch } = useRequest(stageGraph.getStage);
     const stage = useFirst(nodes);
     provide("stage", stage);
     watch(
       () => props.id,
       () => {
         if (props.id) {
-          fetch({
-            id: props.id,
-          });
+          fetch(props.id);
         }
       },
       { immediate: true }

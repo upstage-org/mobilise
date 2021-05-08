@@ -1,0 +1,59 @@
+# HLS
+rtmp { 
+    server { 
+        listen 1935; 
+        application live { 
+            live on; 
+            interleave on;
+ 
+            hls on; 
+            hls_path /tmp/hls; 
+            hls_fragment 15s; 
+        } 
+    } 
+} 
+
+http { 
+    default_type application/octet-stream;
+ 
+    server { 
+        listen 81; 
+        location /tv { 
+            root /tmp/hls; 
+        } 
+    }
+ 
+    types {
+        application/vnd.apple.mpegurl m3u8;
+        video/mp2t ts;
+        text/html html;
+    } 
+}
+
+# DASH
+rtmp { 
+    server { 
+        listen 1935; 
+        application live { 
+            live on; 
+            dash on; 
+            dash_path /tmp/dash; 
+            dash_fragment 15s; 
+        } 
+    } 
+} 
+ 
+http { 
+    server { 
+        listen 80; 
+        location /tv { 
+            root /tmp/dash; 
+        } 
+    }
+ 
+    types {
+        text/html html;
+        application/dash+xml mpd;
+    } 
+}
+

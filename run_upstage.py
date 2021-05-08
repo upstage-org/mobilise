@@ -49,4 +49,3 @@ if __name__ == "__main__":
             WSGIServer((FLASK_HOST, FLASK_PORT), app).serve_forever()
     finally:
         DBSession.close()
-

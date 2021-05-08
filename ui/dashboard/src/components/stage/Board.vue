@@ -1,47 +1,54 @@
 <template>
-  <div
-    id="board"
-    @dragenter.prevent
-    @dragover.prevent
-    @drop.prevent="drop"
-    :style="{
-      width: stageSize.width + 'px',
-      height: stageSize.height + 'px',
-      transform:
-        'translateX(' +
-        stageSize.left +
-        'px) translateY(' +
-        stageSize.top +
-        'px)',
-      'background-image': 'url(' + background + ')',
-    }"
+  <section
+    id="live-stage"
+    class="hero bg-cover is-fullheight"
+    :style="{ 'background-color': backdropColor }"
   >
-    <transition-group
-      name="stage-avatars"
-      :css="false"
-      @enter="avatarEnter"
-      @leave="avatarLeave"
+    <div
+      id="board"
+      @dragenter.prevent
+      @dragover.prevent
+      @drop.prevent="drop"
+      :style="{
+        width: stageSize.width + 'px',
+        height: stageSize.height + 'px',
+        transform:
+          'translateX(' +
+          stageSize.left +
+          'px) translateY(' +
+          stageSize.top +
+          'px)',
+        'background-image': 'url(' + background + ')',
+      }"
     >
-      <component
-        v-for="object in objects"
-        :key="object"
-        :is="object.type ?? 'avatar'"
-        :object="object"
-      />
-    </transition-group>
-  </div>
+      <transition-group
+        name="stage-avatars"
+        :css="false"
+        @enter="avatarEnter"
+        @leave="avatarLeave"
+      >
+        <component
+          v-for="object in objects"
+          :key="object"
+          :is="object.type ?? 'avatar'"
+          :object="object"
+        />
+      </transition-group>
+    </div>
+  </section>
 </template>
 
 <script>
 import { computed, watch } from "vue";
 import { useStore } from "vuex";
 import Avatar from "@/components/objects/Avatar/index";
+import Drawing from "@/components/objects/Drawing";
 import Stream from "@/components/objects/Streamer/index";
 import Text from "@/components/objects/Text";
 import anime from "animejs";
 
 export default {
-  components: { Avatar, Prop: Avatar, Drawing: Avatar, Stream, Text },
+  components: { Avatar, Prop: Avatar, Stream, Drawing, Text },
   setup: () => {
     const store = useStore();
     const background = computed(() => store.state.stage.background);
@@ -88,6 +95,7 @@ export default {
         duration: 5000,
       });
     });
+    const backdropColor = computed(() => store.state.stage.backdropColor);
 
     return {
       objects,
@@ -96,6 +104,7 @@ export default {
       avatarLeave,
       stageSize,
       background,
+      backdropColor,
     };
   },
 };

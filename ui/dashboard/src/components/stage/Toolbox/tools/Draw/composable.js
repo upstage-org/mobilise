@@ -24,13 +24,21 @@ const draw = (ctx, { fromX, fromY, x, y, size, color }) => {
     drawDot(ctx, { x: fromX, y: fromY, size, color });
 };
 
-const execute = (ctx, command) => {
+const wait = milisecond => new Promise(res => setTimeout(res, milisecond))
+
+const execute = async (ctx, command, animate) => {
     const { type, size, color, lines } = command;
     if (lines && lines.length) {
         if (type === 'draw') {
-            lines.forEach(({ fromX, fromY, x, y }) => draw(ctx, {
-                fromX, fromY, x, y, size, color
-            }))
+            for (let i = 0; i < lines.length; i++) {
+                const { fromX, fromY, x, y } = lines[i];
+                draw(ctx, {
+                    fromX, fromY, x, y, size, color
+                });
+                if (animate) {
+                    await wait(10)
+                }
+            }
         } else {
             lines.forEach(({ x, y }) => eraseDot(ctx, {
                 x, y, size
@@ -56,12 +64,17 @@ export const useDrawable = () => {
     const el = ref(null);
 
     const data = reactive({
-        history: [],
         lines: []
     });
 
+    const history = reactive([])
+
     const cropImageFromCanvas = () => {
         return canvasUtil.cropImageFromCanvas(el.value);
+    };
+
+    const getDrawedArea = () => {
+        return canvasUtil.clipDrawedArea(el.value)
     };
 
     const findxy = (res, e) => {
@@ -89,7 +102,7 @@ export const useDrawable = () => {
         }
         if (res == "up") {
             data.flag = false;
-            data.history = data.history.concat({
+            history.push({
                 type: mode.value,
                 size: size.value,
                 color: color.value,
@@ -125,7 +138,7 @@ export const useDrawable = () => {
     const attachEventLinsteners = () => {
         const { value: canvas } = el;
         if (canvas) {
-            data.history = []
+            history.length = 0
             canvas.addEventListener(
                 "mousemove",
                 (e) => {
@@ -164,15 +177,15 @@ export const useDrawable = () => {
         const ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (clearHistory) {
-            data.history = []
+            history.length = 0
         }
         return ctx;
     }
 
     const undo = () => {
         const ctx = clearCanvas();
-        data.history.pop();
-        data.history.forEach(command => execute(ctx, command))
+        history.pop();
+        history.forEach(command => execute(ctx, command))
         return ctx;
     }
 
@@ -207,20 +220,53 @@ export const useDrawable = () => {
         }
     };
 
-    return { el, cursor, color, size, mode, cropImageFromCanvas, clearCanvas, undo, toggleErase, data }
+    return { el, cursor, color, size, mode, history, cropImageFromCanvas, getDrawedArea, clearCanvas, undo, toggleErase }
 }
 
-export const useDrawing = (commands) => {
-    const el = ref(null);
+export const useRelativeCommands = drawing => computed(() => {
+    if (!drawing.commands) {
+        return []
+    }
+    const ratio = Math.min(drawing.w / drawing.original.w, drawing.h / drawing.original.h);
+    return drawing.commands.map(command => ({
+        ...command,
+        size: command.size * ratio,
+        x: (command.x - drawing.original.x) * ratio,
+        y: (command.y - drawing.original.y) * ratio,
+        lines: command.lines.map(line => ({
+            x: (line.x - drawing.original.x) * ratio,
+            y: (line.y - drawing.original.y) * ratio,
+            fromX: (line.fromX - drawing.original.x) * ratio,
+            fromY: (line.fromY - drawing.original.y) * ratio,
+        }))
+    }))
+})
 
-    watch(commands, () => {
-        if (!el.value) return;
+export const useDrawing = (drawing) => {
+    const el = ref(null);
+    const commands = useRelativeCommands(drawing)
+
+    const draw = async (newDrawing, oldDrawing) => {
         const { value: canvas } = el;
+        canvas.width = drawing.w;
+        canvas.height = drawing.h;
         const ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        commands.value.forEach(command => execute(ctx, command))
+        for (let i = 0; i < commands.value.length; i++) {
+            const command = commands.value[i];
+            let shouldAnimate = true;
+            if (newDrawing && oldDrawing) {
+                if (i < oldDrawing.commands.length - 1) {
+                    shouldAnimate = false
+                }
+            }
+            execute(ctx, command, shouldAnimate)
+        }
         return ctx;
-    })
+    }
+
+    watch(drawing, draw)
+    onMounted(draw)
 
     return { el }
 }

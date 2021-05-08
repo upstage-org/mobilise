@@ -6,7 +6,7 @@
         <Skeleton v-if="loading" />
         <div v-else class="columns is-multiline">
           <div
-            class="column item"
+            class="column item is-3"
             v-for="item in data"
             :key="item"
             :class="columnClass(item)"
@@ -42,7 +42,7 @@
           <template v-for="item in modelValue" :key="item">
             <div
               v-if="data.includes(item)"
-              class="column item"
+              class="column item is-3"
               @click="remove(item)"
               :class="columnClass(item)"
             >

@@ -110,8 +110,7 @@
               >
                 Save Stage
               </button>
-              <button class="button mr-2 mt-2 is-warning">Clear Chat</button>
-              <button class="button mr-2 mt-2 is-warning">Sweep Stage</button>
+              <SweepStage />
               <button class="button mr-2 mt-2 is-dark">
                 Hide From Stage List
               </button>
@@ -147,9 +146,10 @@ import { notification } from "@/utils/notification";
 import { useRouter } from "vue-router";
 import { displayName } from "@/utils/auth";
 import { debounce } from "@/utils/common";
+import SweepStage from "./SweepStage";
 
 export default {
-  components: { Field },
+  components: { Field, SweepStage },
   setup: () => {
     const router = useRouter();
     const stage = inject("stage");

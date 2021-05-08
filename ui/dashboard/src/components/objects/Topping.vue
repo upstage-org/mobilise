@@ -1,18 +1,13 @@
 <template>
-  <div
-    class="avatar-topping"
-    :style="{
-      top: position.y - 26 + 'px',
-      left: position.x + position.w / 2 + 'px',
-    }"
-  >
+  <div class="avatar-topping">
     <span
       v-if="holder && isPlayer"
       class="icon marker"
-      :class="{ inactive: !active }"
+      :class="{ inactive: !isHolding }"
       :data-tooltip="`${object.name ? object.name + ' held by' : 'Held by'} ${
         holder.nickname
       }`"
+      @click="openChatBox"
     >
       <Icon src="my-avatar.svg" />
     </span>
@@ -23,11 +18,13 @@
         tabindex="-1"
         :key="object.speak"
         :style="{
-          'max-width': position.w + 'px',
-          'min-width': position.w < 100 ? '100px' : 'unset',
+          width: object.w + 'px',
+          'max-width': 'max-content',
         }"
       >
-        <span>{{ object.speak.message }}</span>
+        <div class="py-2 px-4">
+          <Linkify>{{ object.speak.message }}</Linkify>
+        </div>
         <i class="fas fa-caret-down"></i>
       </div>
     </transition>
@@ -39,13 +36,14 @@ import { computed, inject } from "vue";
 import { useStore } from "vuex";
 import anime from "animejs";
 import Icon from "@/components/Icon";
+import Linkify from "@/components/Linkify";
 export default {
-  props: ["position", "object"],
-  components: { Icon },
+  props: ["object", "active"],
+  components: { Icon, Linkify },
   setup: (props) => {
     const store = useStore();
     const holder = inject("holder");
-    const active = computed(
+    const isHolding = computed(
       () => props.object.id === store.state.user.avatarId
     );
     const isPlayer = computed(() => store.getters["auth/loggedIn"]);
@@ -70,22 +68,38 @@ export default {
       });
     };
 
-    return { active, enter, leave, holder, isPlayer };
+    const openChatBox = () => {
+      store.dispatch("stage/openSettingPopup", {
+        type: "ChatBox",
+        simple: true,
+      });
+    };
+
+    return {
+      enter,
+      leave,
+      holder,
+      isHolding,
+      isPlayer,
+      openChatBox,
+    };
   },
 };
 </script>
 
 <style scoped lang="scss">
 .avatar-topping {
-  position: fixed;
+  position: absolute;
+  top: -36px;
+  left: 50%;
 }
 .chat-bubble {
-  position: fixed;
+  position: absolute;
   border-radius: 4px;
-  padding: 0.25em 0.75em;
   text-align: center;
   line-height: 1em;
   background: white;
+  word-break: break-word;
   box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
     0 0px 0 1px rgba(10, 10, 10, 0.02);
   i.fas {
@@ -97,26 +111,7 @@ export default {
 }
 .marker {
   position: absolute;
-  left: -10px;
-  -webkit-animation: spin 2s linear infinite;
-  -moz-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
-}
-@-moz-keyframes spin {
-  100% {
-    -moz-transform: rotate3d(0, 1, 0, 360deg);
-  }
-}
-@-webkit-keyframes spin {
-  100% {
-    -webkit-transform: rotate3d(0, 1, 0, 360deg);
-  }
-}
-@keyframes spin {
-  100% {
-    -webkit-transform: rotate3d(0, 1, 0, 360deg);
-    transform: rotate3d(0, 1, 0, 360deg);
-  }
+  left: -12px;
 }
 .inactive {
   filter: grayscale(1);

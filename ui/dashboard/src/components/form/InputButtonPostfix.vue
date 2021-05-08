@@ -4,7 +4,7 @@
       ref="el"
       class="input is-rounded"
       :value="modelValue"
-      @input="$emit('update:modelValue')"
+      @input="(e) => $emit('update:modelValue', e.target.value)"
       @keyup.enter="(e) => $emit('ok', e.target.value)"
       v-bind="$attrs"
     />
@@ -14,7 +14,9 @@
       :disabled="loading"
       @click="$emit('ok', el.value)"
     >
-      <i :class="icon"></i>
+      <slot name="icon">
+        <i :class="icon"></i>
+      </slot>
     </button>
   </div>
 </template>
@@ -31,5 +33,9 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+input.is-rounded {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
 </style>

@@ -44,7 +44,7 @@
     </div>
     <footer class="card-footer">
       <a
-        class="card-footer-item is-white button no-shadow has-text-primary"
+        class="card-footer-item is-white button has-text-primary"
         :class="{ 'is-loading': loading }"
         @click="submit"
       >

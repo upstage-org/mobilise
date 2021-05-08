@@ -11,6 +11,7 @@ Base = declarative_base()
 class Event(Base):
     __tablename__ = "events"
     id = Column(Integer, primary_key=True)
+    topic = Column(String)
     mqtt_timestamp = Column(Float, index=True)
     performance_id = Column(Integer, index=True)
     payload = Column(postgresql.JSON)

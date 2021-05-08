@@ -81,12 +81,12 @@ def worker():
             event = queue.find_one_and_delete({})
             if event:
                 logging.info(f"{os.getpid()} Processing: {event}")
-                _, perf_id = event["topic"].split("/")
+                topic = event["topic"]
                 payload = json.loads(event["payload"])
                 timestamp = event["timestamp"]
                 funcs = functions_for(payload)
                 for f in funcs:
-                    f(perf_id, payload, timestamp)
+                    f(topic, payload, timestamp)
         except Exception as e:
             logging.error(e)
     logging.info("Worker exited")

@@ -1,3 +1,4 @@
+import configs from "@/config";
 import store from "@/store";
 
 export function toRelative(size) {
@@ -21,7 +22,7 @@ export function serializeObject(object, keepSrc) {
     if (!keepSrc) {
         object = {
             ...object,
-            src: type === 'drawing' || type === 'stream' || type === 'text' ? null : src
+            src: type === 'stream' ? null : src
         };
     }
     object.x = toRelative(object.x)
@@ -34,7 +35,7 @@ export function serializeObject(object, keepSrc) {
 
 export function deserializeObject(object, keepSrc) {
     if (!keepSrc) {
-        if (object.type === 'drawing' || object.type === 'stream' || object.type === 'text') {
+        if (object.type === 'stream') {
             delete object.src;
         }
     }
@@ -46,12 +47,14 @@ export function deserializeObject(object, keepSrc) {
     return object;
 }
 
-export function namespaceTopic(topicName) {
-    const url = store.getters['stage/url'];
-    return `${url}/${topicName}`;
+export function namespaceTopic(topicName, stageUrl) {
+    const url = stageUrl ?? store.getters['stage/url'];
+    const namespace = configs.MQTT_NAMESPACE;
+    return `${namespace}/${url}/${topicName}`;
 }
 
 export function unnamespaceTopic(topicName) {
     const url = store.getters['stage/url'];
-    return topicName.substring(url.length + 1);
+    const namespace = configs.MQTT_NAMESPACE;
+    return topicName.substring(namespace.length + url.length + 2);
 }

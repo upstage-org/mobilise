@@ -53,4 +53,7 @@ export default {
 </script>
 
 <style>
+.modal {
+  z-index: 4000 !important;
+}
 </style>

@@ -2,12 +2,13 @@ import moment from 'moment'
 import { v4 as uuidv4 } from "uuid";
 import hash from 'object-hash';
 import mqtt from '@/services/mqtt'
-import { absolutePath, randomColor, randomMessageColor, randomRange } from '@/utils/common'
-import { TOPICS, BOARD_ACTIONS } from '@/utils/constants'
-import { deserializeObject, recalcFontSize, serializeObject } from './reusable';
+import { absolutePath, cloneDeep, randomColor, randomMessageColor, randomRange } from '@/utils/common'
+import { TOPICS, BOARD_ACTIONS, BACKGROUND_ACTIONS } from '@/utils/constants'
+import { deserializeObject, recalcFontSize, serializeObject, unnamespaceTopic } from './reusable';
 import { getViewport } from './reactiveViewport';
 import { stageGraph } from '@/services/graphql';
 import { useAttribute } from '@/services/graphql/composable';
+import { avatarSpeak } from '@/services/speech';
 
 export default {
     namespaced: true,
@@ -15,11 +16,13 @@ export default {
         preloading: true,
         model: null,
         background: null,
+        backdropColor: '#ebffee',
         status: 'OFFLINE',
         subscribeSuccess: false,
         chat: {
             messages: [],
             color: randomMessageColor(),
+            opacity: 0.9
         },
         board: {
             objects: [],
@@ -48,11 +51,24 @@ export default {
                 fontFamily: 'Josefin Sans',
             }
         },
+        settings: {
+            chatVisibility: true,
+        },
         hosts: [],
         reactions: [],
         viewport: getViewport(),
         sessions: [],
-        session: null
+        session: null,
+        replay: {
+            timestamp: {
+                begin: 0,
+                end: 0,
+                current: 0
+            },
+            timers: [],
+            interval: null,
+            speed: 32
+        }
     },
     getters: {
         url(state) {
@@ -126,9 +142,12 @@ export default {
                 }
             }
         },
-        CLEAN_STAGE(state) {
-            state.model = null;
-            // state.background = null;
+        CLEAN_STAGE(state, cleanModel) {
+            if (cleanModel) {
+                state.model = null;
+            }
+            state.status = 'OFFLINE';
+            state.background = null;
             state.tools.avatars = [];
             state.tools.props = [];
             state.tools.backdrops = []
@@ -164,28 +183,26 @@ export default {
         UPDATE_OBJECT(state, object) {
             const { id } = object;
             deserializeObject(object);
-            const avatar = state.board.objects.find(o => o.id === id);
-            if (avatar) { // Object an is avatar
-                Object.assign(avatar, object);
-                return;
+            const model = state.board.objects.find(o => o.id === id);
+            if (model) {
+                Object.assign(model, object);
             }
-            state.board.objects.push(object)
         },
         DELETE_OBJECT(state, object) {
             const { id } = object;
             state.board.objects = state.board.objects.filter(o => o.id !== id);
         },
         SET_OBJECT_SPEAK(state, { avatar, speak }) {
+            speak.hash = hash(speak)
             const { id } = avatar;
             let model = state.board.objects.find(o => o.id === id);
-            if (!model) {
-                const length = state.board.objects.push(avatar)
-                model = state.board.objects[length - 1];
+            if (model && model.speak?.hash !== speak.hash) {
+                model.speak = speak;
+                avatarSpeak(model);
+                setTimeout(() => {
+                    if (model.speak?.message === speak.message) { model.speak = null }
+                }, 1000 + speak.message.split(' ').length * 1000);
             }
-            model.speak = speak;
-            setTimeout(() => {
-                if (model.speak.message === speak.message) { model.speak = null }
-            }, 1000 + speak.message.split(' ').length * 1000);
         },
         SET_PRELOADING_STATUS(state, status) {
             state.preloading = status;
@@ -219,7 +236,7 @@ export default {
             Object.assign(state.preferences, preferences);
         },
         PUSH_DRAWING(state, drawing) {
-            state.board.drawings.push(drawing);
+            state.board.drawings.push(cloneDeep(drawing));
         },
         PUSH_TEXT(state, text) {
             state.board.texts.push(text);
@@ -261,11 +278,31 @@ export default {
                 recalcFontSize(object, s => s * ratio)
             })
         },
-        UPDATE_SESSIONS_COUNTER(state, sessions) {
-            if (sessions && sessions.length) {
-                state.sessions = sessions.filter(s => moment().diff(moment(new Date(s.at)), 'minute') < 60);
-                state.sessions.sort((a, b) => b.at - a.at);
+        SET_CHAT_OPACITY(state, opacity) {
+            state.chat.opacity = opacity;
+        },
+        UPDATE_SESSIONS_COUNTER(state, session) {
+            const index = state.sessions.findIndex(s => s.id === session.id)
+            if (index > -1) {
+                if (session.leaving) {
+                    return state.sessions.splice(index, 1)
+                } else {
+                    Object.assign(state.sessions[index], session)
+                }
+            } else {
+                state.sessions.push(session)
             }
+            state.sessions = state.sessions.filter(s => moment().diff(moment(new Date(s.at)), 'minute') < 60);
+            state.sessions.sort((a, b) => b.at - a.at);
+        },
+        SET_CHAT_VISIBILITY(state, visible) {
+            state.settings.chatVisibility = visible
+        },
+        SET_BACKDROP_COLOR(state, color) {
+            state.backdropColor = color
+        },
+        SET_REPLAY(state, replay) {
+            Object.assign(state.replay, replay)
         }
     },
     actions: {
@@ -274,19 +311,18 @@ export default {
 
             const client = mqtt.connect();
             client.on("connect", () => {
-                console.log("Connection succeeded!");
                 commit('SET_STATUS', 'LIVE')
                 dispatch('subscribe');
+                dispatch('joinStage');
             });
-            client.on("error", (error) => {
-                console.log(error);
+            client.on("error", () => {
                 commit('SET_STATUS', 'OFFLINE')
             });
             mqtt.receiveMessage((payload) => {
                 dispatch('handleMessage', payload);
             })
         },
-        subscribe({ commit, dispatch }) {
+        subscribe({ commit }) {
             const topics = {
                 [TOPICS.CHAT]: { qos: 2 },
                 [TOPICS.BOARD]: { qos: 2 },
@@ -298,9 +334,6 @@ export default {
             mqtt.subscribe(topics).then(res => {
                 commit('SET_SUBSCRIBE_STATUS', true);
                 console.log("Subscribed to topics: ", res);
-                setTimeout(() => {
-                    dispatch('handleCounterMessage', {})
-                }, 5000)
             })
         },
         async disconnect({ dispatch }) {
@@ -341,7 +374,7 @@ export default {
                 backgroundColor: state.chat.color.bg,
                 at: +new Date()
             };
-            mqtt.sendMessage(TOPICS.CHAT, payload).catch(error => console.log(error));
+            mqtt.sendMessage(TOPICS.CHAT, payload);
             const avatar = getters['currentAvatar']
             if (avatar) {
                 mqtt.sendMessage(TOPICS.BOARD, {
@@ -461,10 +494,28 @@ export default {
             }
         },
         setBackground(action, background) {
-            mqtt.sendMessage(TOPICS.BACKGROUND, background)
+            mqtt.sendMessage(TOPICS.BACKGROUND, { type: BACKGROUND_ACTIONS.CHANGE_BACKGROUND, background })
+        },
+        showChatBox(action, visible) {
+            mqtt.sendMessage(TOPICS.BACKGROUND, { type: BACKGROUND_ACTIONS.SET_CHAT_VISIBILITY, visible })
+        },
+        setBackdropColor(action, color) {
+            mqtt.sendMessage(TOPICS.BACKGROUND, { type: BACKGROUND_ACTIONS.SET_BACKDROP_COLOR, color })
         },
         handleBackgroundMessage({ commit }, { message }) {
-            commit('SET_BACKGROUND', message);
+            switch (message.type) {
+                case BACKGROUND_ACTIONS.CHANGE_BACKGROUND:
+                    commit('SET_BACKGROUND', message.background);
+                    break;
+                case BACKGROUND_ACTIONS.SET_CHAT_VISIBILITY:
+                    commit('SET_CHAT_VISIBILITY', message.visible)
+                    break;
+                case BACKGROUND_ACTIONS.SET_BACKDROP_COLOR:
+                    commit('SET_BACKDROP_COLOR', message.color)
+                    break;
+                default:
+                    break;
+            }
         },
         playAudio(_, audio) {
             audio.isPlaying = true;
@@ -487,8 +538,7 @@ export default {
         addDrawing({ commit, dispatch }, drawing) {
             drawing.type = 'drawing';
             commit('PUSH_DRAWING', drawing);
-            commit('UPDATE_IS_DRAWING', false);
-            dispatch('placeObjectOnStage', drawing);
+            return dispatch('placeObjectOnStage', drawing);
         },
         addStream({ commit, dispatch }, stream) {
             stream.type = 'stream';
@@ -506,49 +556,86 @@ export default {
         sendReaction(_, reaction) {
             mqtt.sendMessage(TOPICS.REACTION, reaction);
         },
-        async loadStage({ commit }, url) {
-            commit('CLEAN_STAGE', null);
+        async loadStage({ commit, dispatch }, { url, recordId }) {
+            commit('CLEAN_STAGE', true);
             commit('SET_PRELOADING_STATUS', true);
-            const response = await stageGraph.stageList({
-                fileLocation: url
-            })
-            const model = response.stageList.edges[0]?.node;
+            const model = await stageGraph.loadStage(url, recordId)
             if (model) {
                 commit('SET_MODEL', model);
+                const { events } = model
+                if (recordId) {
+                    commit('SET_REPLAY', {
+                        timestamp: {
+                            begin: events[0].mqttTimestamp,
+                            current: events[0].mqttTimestamp,
+                            end: events[events.length - 1].mqttTimestamp,
+                        }
+                    })
+                } else {
+                    events.forEach(event => dispatch('replayEvent', event));
+                }
             } else {
                 commit('SET_PRELOADING_STATUS', false);
             }
         },
-        handleCounterMessage({ commit, dispatch, state, rootState }, { message }) {
-            commit('UPDATE_SESSIONS_COUNTER', message)
-            if (!state.session) {
-                state.session = rootState.user.user?.id ?? uuidv4()
-                const session = state.sessions.find(s => s.id === state.session)
-                if (session?.avatarId) {
-                    commit('user/SET_AVATAR_ID', session.avatarId, { root: true });
+        replayEvent({ dispatch }, { topic, payload }) {
+            dispatch("handleMessage", {
+                topic: unnamespaceTopic(topic),
+                message: JSON.parse(payload),
+            })
+        },
+        async replayRecord({ state, dispatch, commit }, timestamp) {
+            await dispatch('pauseReplay');
+            const current = timestamp ? Number(timestamp) : state.replay.timestamp.begin
+            state.replay.timestamp.current = current
+            commit('CLEAN_STAGE')
+            state.replay.isReplaying = true
+            const events = state.model.events
+            const speed = state.replay.speed
+            state.replay.interval = setInterval(() => {
+                state.replay.timestamp.current += 10
+                if (state.replay.timestamp.current > state.replay.timestamp.end) {
+                    dispatch('pauseReplay');
                 }
-                dispatch('joinStage')
+            }, 1000 / speed)
+            events.forEach(event => {
+                const timer = setTimeout(() => {
+                    dispatch('replayEvent', event);
+                }, (event.mqttTimestamp - current) * 100 / speed)
+                state.replay.timers.push(timer)
+            });
+        },
+        pauseReplay({ state }) {
+            clearInterval(state.replay.interval)
+            state.replay.interval = null
+            state.replay.timers.forEach(timer => clearTimeout(timer))
+            state.replay.timers = []
+        },
+        handleCounterMessage({ commit, state }, { message }) {
+            commit('UPDATE_SESSIONS_COUNTER', message)
+            if (message.id === state.session && message.avatarId) {
+                commit('user/SET_AVATAR_ID', message.avatarId, { root: true });
             }
         },
-        async joinStage({ rootGetters, state }) {
+        async joinStage({ rootGetters, state, rootState }) {
+            if (!state.session) {
+                state.session = rootState.user.user?.id ?? uuidv4()
+            }
             const id = state.session
-            const session = state.sessions.find(s => s.id === id)
             const isPlayer = rootGetters['auth/loggedIn'];
             const nickname = rootGetters['user/nickname'];
             const avatarId = rootGetters['user/avatarId'];
             const at = +new Date();
-            if (session) {
-                Object.assign(session, { isPlayer, nickname, at, avatarId })
-            } else {
-                state.sessions.push({ id, isPlayer, nickname, at, avatarId })
+            const payload = { id, isPlayer, nickname, at, avatarId }
+            if (!payload.avatarId) {
+                delete payload.avatarId
             }
-            await mqtt.sendMessage(TOPICS.COUNTER, state.sessions);
+            await mqtt.sendMessage(TOPICS.COUNTER, payload);
         },
         async leaveStage({ state }) {
             const id = state.session
-            state.sessions = state.sessions.filter(s => s.id !== id)
             state.session = null
-            await mqtt.sendMessage(TOPICS.COUNTER, state.sessions);
+            await mqtt.sendMessage(TOPICS.COUNTER, { id, leaving: true });
         }
     },
 };
